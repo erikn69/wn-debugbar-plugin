@@ -185,6 +185,12 @@ class Plugin extends PluginBase
         $profile = new Profile;
         $debugBar = $this->app->make(\Barryvdh\Debugbar\LaravelDebugbar::class);
 
+        if (class_exists(\DebugBar\Bridge\NamespacedTwigProfileCollector::class)) {
+            $debugBar->addCollector(new \DebugBar\Bridge\NamespacedTwigProfileCollector($profile));
+        } else {
+            $debugBar->addCollector(new \DebugBar\Bridge\TwigProfileCollector($profile));
+        }
+
         Event::listen('cms.page.beforeDisplay', function ($controller, $url, $page) use ($profile, $debugBar) {
             $twig = $controller->getTwig();
             if (!$twig->hasExtension(\Winter\DebugBar\Twig\Extension\Debug::class)) {
@@ -195,13 +201,11 @@ class Plugin extends PluginBase
             if (!$twig->hasExtension(ProfilerExtension::class)) {
                 $twig->addExtension(new ProfilerExtension($profile));
             }
-        });
 
-        if (class_exists(\DebugBar\Bridge\NamespacedTwigProfileCollector::class)) {
-            $debugBar->addCollector(new \DebugBar\Bridge\NamespacedTwigProfileCollector($profile));
-        } else {
-            $debugBar->addCollector(new \DebugBar\Bridge\TwigProfileCollector($profile));
-        }
+            if (method_exists($debugBar['twig'], 'setLoaderOrEnv')) {
+                $debugBar['twig']->setLoaderOrEnv($twig);
+            }
+        });
     }
 
     /**
