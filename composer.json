@@ -34,7 +34,7 @@
         "installer-name": "debugbar",
         "laravel": {
             "dont-discover": [
-                "barryvdh/laravel-debugbar"
+                "fruitcake/laravel-debugbar"
             ]
         }
     }
